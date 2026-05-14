@@ -38,7 +38,6 @@ const localImg = './menu-principale.jpeg'
 
 const bldButtons = [
   { title: "🛡️ SICUREZZA", command: "attiva" },
-  { title: "🎮 GIOCHI", command: "menugiochi" },
   { title: "👥 GRUPPO", command: "menugruppo" },
   { title: "📥 DOWNLOAD", command: "menudownload" },
   { title: "🛠️ STRUMENTI", command: "menustrumenti" },
