@@ -3,7 +3,7 @@ import { join } from 'path'
 
 const emojicategoria = {
   info: 'ℹ️',
-  main: '💠',
+  main: '🦂',
   sicurezza: '🛡️'
 }
 
@@ -17,7 +17,7 @@ let tags = {
 const defaultMenu = {
   testoInizio: `
 ┏━━━━━━━━━━━━━━━━━━━━┓
-   💠  ** 💠
+   🦂  *𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴* 🦂
 ┗━━━━━━━━━━━━━━━━━━━━┛
  ┌───────────────────
  │ 👤 *User:* %name
@@ -110,7 +110,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 
   } catch (e) {
     console.error(e)
-    conn.reply(m.chat, `❌ Errore BLD-SYS: ${e.message}`, m)
+    conn.reply(m.chat, `❌ Errore: ${e.message}`, m)
   }
 }
 
