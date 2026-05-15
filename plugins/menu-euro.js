@@ -1,20 +1,20 @@
 import { promises as fs } from 'fs'
-import { join } from 'path'
 
 const defaultMenu = {
   testoInizio: `
- *𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 ꪶ⃬🦂ꫂ*
+*𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 ꪶ⃬🦂ꫂ*
 ┌───────────────────
 │ 👤 *User:* %name
 │ 🕒 *Uptime:* %uptime
 │ 👥 *Users:* %totalreg
-└───────────────────`
-  testoFine: `_Scorpion System Terminal v3.0_`,
+└───────────────────
+`,
+
+  testoFine: `_Scorpion System Terminal v3.0_`
 }
 
 const localImg = './menu-principale.jpeg'
 
-// Rimosso Giochi ed Euro come richiesto
 const bldButtons = [
   { title: "🛡️ SICUREZZA", command: "attiva" },
   { title: "👥 GRUPPO", command: "menugruppo" },
@@ -28,36 +28,18 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 
     let name = await conn.getName(m.sender) || 'User'
     let uptime = clockString(process.uptime() * 1000)
-    let totalreg = Object.keys(global.db.data.users).length
 
-    let help = Object.values(global.plugins).filter(p => !p.disabled).map(p => ({
-      help: Array.isArray(p.help) ? p.help : [p.help],
-      tags: Array.isArray(p.tags) ? p.tags : [p.tags],
-      prefix: 'customPrefix' in p
-    }))
+    let totalreg = global.db?.data?.users
+      ? Object.keys(global.db.data.users).length
+      : 0
 
-    let menuTags = Object.keys(tags)
-
-    let _text = [
-      defaultMenu.testoInizio,
-      ...menuTags.map(tag => {
-        return defaultMenu.header.replace(/%category/g, tags[tag]) + '\n' + [
-          ...help
-            .filter(menu => menu.tags.includes(tag))
-            .map(menu => menu.help.map(h => 
-              defaultMenu.body
-                .replace(/%cmd/g, menu.prefix ? h : _p + h)
-                .replace(/%emoji/g, emojicategoria[tag])
-            ).join('\n')),
-          defaultMenu.footer
-        ].join('\n')
-      }),
+    let text =
+      defaultMenu.testoInizio +
+      `\n\n` +
       defaultMenu.testoFine
-    ].join('\n')
-
-    let text = _text.replace(/%name/g, name)
-                    .replace(/%uptime/g, uptime)
-                    .replace(/%totalreg/g, totalreg)
+        .replace(/%name/g, name)
+        .replace(/%uptime/g, uptime)
+        .replace(/%totalreg/g, totalreg)
 
     const buttons = bldButtons.map(btn => ({
       buttonId: _p + btn.command,
@@ -69,24 +51,20 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
     try {
       imageBuffer = await fs.readFile(localImg)
     } catch (e) {
-      // Se l'immagine non esiste, imageBuffer rimane null e non crasha
-      console.log("⚠️ Menu Image not found, sending text only.")
+      console.log("⚠️ Immagine non trovata, invio testo.")
     }
 
-    // Configurazione messaggio (con o senza immagine)
     let messageContent = {
-      caption: text.trim(),
-      footer: "𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 ꪶ⃬🦂ꫂ 𝐒𝐘𝐒𝐓𝐄𝐌",
-      buttons: buttons,
-      headerType: imageBuffer ? 4 : 1,
+      footer: "𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 ꪶ⃬🦂ꫂ SYSTEM",
+      buttons,
       viewOnce: true
     }
 
     if (imageBuffer) {
       messageContent.image = imageBuffer
+      messageContent.caption = text.trim()
     } else {
       messageContent.text = text.trim()
-      delete messageContent.caption // Rimuovo caption se invio come testo semplice
     }
 
     await conn.sendMessage(m.chat, messageContent, { quoted: m })
@@ -94,6 +72,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 
   } catch (e) {
     console.error(e)
+    m.reply("❌ Errore nel menu")
   }
 }
 
