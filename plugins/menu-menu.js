@@ -21,13 +21,6 @@ const defaultMenu = {
 │ 🕒 *Uptime:* %uptime
 │ 👥 *Users:* %totalreg
 └───────────────────
-
-*📋 ᴇʟᴇɴᴄᴏ ᴍᴏᴅᴜʟɪ ᴅɪꜱᴘᴏɴɪʙɪʟɪ:*
-`.trimStart(),
-
-  header: '┏━━━〔 %category 〕━━━┓',
-  body: '┃ ⌬ %emoji %cmd',
-  footer: '┗━━━━━━━━━━━━━━━──┛\n',
   testoFine: `_Scorpion System Terminal v3.0_`,
 }
 
