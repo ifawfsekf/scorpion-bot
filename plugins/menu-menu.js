@@ -2,49 +2,47 @@ import { promises as fs } from 'fs'
 import { join } from 'path'
 
 const emojicategoria = {
-  info: 'ℹ️',
-  main: '💠',
+  info: '📂',
+  main: '⚡',
   sicurezza: '🛡️'
 }
 
 let tags = {
-  main: '╭ *`SYSTEM MAIN`* ╯',
-  sicurezza: '╭ *`SECURITY SYSTEM`* ╯',
-  info: '╭ *`DATABASE INFO`* ╯'
+  main: '𝐒𝐘𝐒𝐓𝐄𝐌 𝐂𝐎𝐑𝐄',
+  sicurezza: '𝐒𝐄𝐂𝐔𝐑𝐈𝐓𝐘',
+  info: '𝐃𝐀𝐓𝐀𝐁𝐀𝐒𝐄'
 }
 
-// CAMBIATO: "before" diventa "testoInizio", "after" diventa "testoFine"
 const defaultMenu = {
   testoInizio: `
-┏━━━━━━━━━━━━━━━━━━━━┓
-   💠  *B L D  -  B O T* 💠
-┗━━━━━━━━━━━━━━━━━━━━┛
- ┌───────────────────
- │ 👤 *User:* %name
- │ 🕒 *Uptime:* %uptime
- │ 👥 *Total Users:* %totalreg
- └───────────────────
- 
- *PANNELLO DI CONTROLLO:*
+🦂 *𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 ꪶ⃬🦂ꫂ* 🦂
+*ＭＡＳＴＥＲ  ＩＮＴＥＲＦＡＣＥ*
+
+┌───────────────────
+│ 👤 *User:* %name
+│ 🕒 *Uptime:* %uptime
+│ 👥 *Users:* %totalreg
+└───────────────────
+
+*📋 ᴇʟᴇɴᴄᴏ ᴍᴏᴅᴜʟɪ ᴅɪꜱᴘᴏɴɪʙɪʟɪ:*
 `.trimStart(),
 
-  header: '      ⋆｡˚『 %category 』˚｡⋆\n╭',
-  body: '*│ ➢* 『%emoji』 %cmd',
-  footer: '*╰━━━━━━━──────━━━━━━━*\n',
-  testoFine: `_Powered by BLD-BOT Interface_`,
+  header: '┏━━━〔 %category 〕━━━┓',
+  body: '┃ ⌬ %emoji %cmd',
+  footer: '┗━━━━━━━━━━━━━━━──┛\n',
+  testoFine: `_Scorpion System Terminal v3.0_`,
 }
 
 const localImg = './menu-principale.jpeg'
 
+// Rimosso Giochi ed Euro come richiesto
 const bldButtons = [
   { title: "🛡️ SICUREZZA", command: "attiva" },
-  { title: "🎮 GIOCHI", command: "menugiochi" },
   { title: "🤖 IA", command: "menuia" },
   { title: "👥 GRUPPO", command: "menugruppo" },
   { title: "📥 DOWNLOAD", command: "menudownload" },
   { title: "🛠️ STRUMENTI", command: "menustrumenti" },
-  { title: "⭐ PREMIUM", command: "menupremium" },
-  { title: "💰 EURO", command: "menueuro" }
+  { title: "⭐ PREMIUM", command: "menupremium" }
 ]
 
 let handler = async (m, { conn, usedPrefix: _p }) => {
@@ -63,7 +61,6 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 
     let menuTags = Object.keys(tags)
 
-    // CAMBIATO: uso testoInizio e testoFine qui sotto
     let _text = [
       defaultMenu.testoInizio,
       ...menuTags.map(tag => {
@@ -95,23 +92,31 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
     try {
       imageBuffer = await fs.readFile(localImg)
     } catch (e) {
-      console.log("⚠️ Immagine NON trovata")
+      // Se l'immagine non esiste, imageBuffer rimane null e non crasha
+      console.log("⚠️ Menu Image not found, sending text only.")
     }
 
-    await conn.sendMessage(m.chat, {
-      ...(imageBuffer ? { image: imageBuffer } : {}),
+    // Configurazione messaggio (con o senza immagine)
+    let messageContent = {
       caption: text.trim(),
-      footer: "B L D - B O T  S Y S T E M",
+      footer: "𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 ꪶ⃬🦂ꫂ 𝐒𝐘𝐒𝐓𝐄𝐌",
       buttons: buttons,
-      headerType: 4,
+      headerType: imageBuffer ? 4 : 1,
       viewOnce: true
-    }, { quoted: m })
+    }
 
-    await m.react('💠')
+    if (imageBuffer) {
+      messageContent.image = imageBuffer
+    } else {
+      messageContent.text = text.trim()
+      delete messageContent.caption // Rimuovo caption se invio come testo semplice
+    }
+
+    await conn.sendMessage(m.chat, messageContent, { quoted: m })
+    await m.react('🦂')
 
   } catch (e) {
     console.error(e)
-    conn.reply(m.chat, `❌ Errore BLD-SYS: ${e.message}`, m)
   }
 }
 
