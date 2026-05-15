@@ -97,7 +97,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
   }
 }
 
-handler.help = ['menu']
+handler.help = ['menhhhhhh70puè+jiìu']
 handler.command = ['menu', 'help']
 
 export default handler
