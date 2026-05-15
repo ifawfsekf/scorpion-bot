@@ -20,7 +20,7 @@ export async function before(m, { conn, isAdmin, isOwner, isSam }) {
   if (!chat?.antiBot) return;
   if (!m.isGroup || !m.sender || !m.key?.id) return;
   
-  // Gli admin, Blood e il bot stesso sono immuni
+  // Gli admin e il bot stesso sono immuni
   if (isAdmin || isOwner || isSam || m.fromMe) return;
 
   const msgID = m.key?.id;
@@ -40,11 +40,11 @@ export async function before(m, { conn, isAdmin, isOwner, isSam }) {
   // Esecuzione sanzione
   await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove');
 
-  // Messaggio estetico BLD-BLOOD
+ 
   const text = `
 ⋆｡˚『 ╭ \`SISTEMA ANTIBOT\` ╯ 』˚｡⋆
 ╭
-┃ 🛡️ \`Stato:\` *Protocollo Blood Attivo*
+┃ 🛡️ \`Stato:\` *Protocollo Attivo*
 ┃
 ┃ 『 👤 』 \`Target:\` @${m.sender.split('@')[0]}
 ┃ 『 🤖 』 \`Dispositivo:\` *${device.toUpperCase()}*
@@ -58,7 +58,7 @@ export async function before(m, { conn, isAdmin, isOwner, isSam }) {
     mentions: [m.sender],
     contextInfo: {
       externalAdReply: {
-        title: 'BLD-BLOOD SECURITY',
+        title: ' SECURITY',
         body: 'Rilevamento connessione non sicura',
         thumbnailUrl: 'https://qu.ax/TfUj.jpg', // Usa la tua immagine se ne hai una specifica
         mediaType: 1,
