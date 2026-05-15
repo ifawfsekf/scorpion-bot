@@ -692,16 +692,16 @@ let handler = async (m, { conn, usedPrefix }) => {
 
         await conn.sendMessage(m.chat, {
             image: imageBuffer,
-            caption: ` ⋆｡˚『 ╭ \`BANCA BLOODBOT\` ╯ 』˚｡⋆\n╭\n│\n│ 『 💰 』 \`Euro in banca:\`\n│ ➤ *${user.bank.toLocaleString()}*\n│『 📊 』 \`Livello:\` *${user.level}*\n│『 ⚜️ 』 \`Ruolo:\` *${user.role}*\n│\n*╰⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─*`,
+            caption: ` ⋆｡˚『 ╭ \`BANCA 𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 ꪶ⃬🦂ꫂ \` ╯ 』˚｡⋆\n╭\n│\n│ 『 💰 』 \`Euro in banca:\`\n│ ➤ *${user.bank.toLocaleString()}*\n│『 📊 』 \`Livello:\` *${user.level}*\n│『 ⚜️ 』 \`Ruolo:\` *${user.role}*\n│\n*╰⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─*`,
             buttons: buttons,
-            footer: 'vare ㌌ bot',
+            footer: '',
             mentions: [who]
         }, { quoted: m });
         
     } catch (error) {
         console.error('Errore nella generazione dell\'immagine o nell\'invio del messaggio:', error);
         let txt = `
- ⋆｡˚『 ╭ \`BANCA VAREBOT\` ╯ 』˚｡⋆\n╭\n│
+ ⋆｡˚『 ╭ \`BANCA 𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 ꪶ⃬🦂ꫂ \` ╯ 』˚｡⋆\n╭\n│
 │ 『 👤 』 \`Nome:\` ${name}
 │ 『 🍥 』\`Utente:\` @${who.split('@')[0]}
 │
