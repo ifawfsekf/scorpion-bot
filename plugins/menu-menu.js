@@ -1,18 +1,6 @@
 import { promises as fs } from 'fs'
 import { join } from 'path'
 
-const emojicategoria = {
-  info: '📂',
-  main: '⚡',
-  sicurezza: '🛡️'
-}
-
-let tags = {
-  main: '𝐒𝐘𝐒𝐓𝐄𝐌 𝐂𝐎𝐑𝐄',
-  sicurezza: '𝐒𝐄𝐂𝐔𝐑𝐈𝐓𝐘',
-  info: '𝐃𝐀𝐓𝐀𝐁𝐀𝐒𝐄'
-}
-
 const defaultMenu = {
   testoInizio: `
  *𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 ꪶ⃬🦂ꫂ*
