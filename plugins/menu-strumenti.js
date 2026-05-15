@@ -1,36 +1,31 @@
 import { promises } from 'fs'
 import { join } from 'path'
 
-// --- PERCORSO IMMAGINE ---
-const localImg = join(process.cwd(), 'menu-strumenti.jpeg');
-
 const defmenu = {
   before: `
-┏━━━━━━━━━━━━━━━━━━━━┓
-   💉  *B L O O D  -  T O O L S* 💉
-┗━━━━━━━━━━━━━━━━━━━━┛
- ┌───────────────────
- │ 🧪 *Soggetto:* %name
- │ ⚙️ *Moduli:* Strumenti
- │ ⚠️ *Status:* Deep Scan
- └───────────────────
+   *𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 ꪶ⃬🦂ꫂ*
+   ──────────────
+   *USER:* _%name_
+   *CATEGORY:* _Strumenti_
+   *STATUS:* _Deep Scan_
+   ──────────────
 `.trimStart(),
-  header: '      ⋆｡˚『 %category 』˚｡⋆\n╭',
-  body: '│ ⚡  %cmd',
-  footer: '*╰━━━━━──ׄ──ׅ──ׄ──━━━━━*\n',
-  after: `_☣️ Estrazione dati completata._`.trimEnd()
+  header: '   *╒══  🛠️ %category  ══╕*',
+  body: '   ┇ ⌬ %cmd',
+  footer: '   *╘══════════════╛*\n',
+  after: `_Scorpion System Terminal v3.0_`.trimEnd()
 }
 
 let handler = async (m, { conn, usedPrefix: _p }) => {
   let tags = {
-    'strumenti': 'LABORATORIO BLOOD'
+    'strumenti': '𝐒𝐓𝐑𝐔𝐌𝐄𝐍𝐓𝐈'
   }
 
   try {
     await conn.sendPresenceUpdate('composing', m.chat)
-    
+
     let name = await conn.getName(m.sender) || 'Soggetto Ignoto'
-    
+
     // Filtro plugin per la categoria strumenti
     let help = Object.values(global.plugins)
       .filter(plugin => !plugin.disabled && plugin.tags && plugin.tags.includes('strumenti'))
@@ -50,28 +45,31 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
       defmenu.after
     ].join('\n')
 
-    let fake = global.fake || {};
+    await m.react('🛠️')
 
-    await m.react('🧪')
-
-    // --- INVIO COME IMMAGINE (SOSTITUITO VIDEO) ---
+    // Invio solo testo con contextInfo avanzato
     await conn.sendMessage(m.chat, {
-      image: { url: localImg },
-      caption: _text.trim(),
+      text: _text.trim(),
       contextInfo: {
-        ...fake.contextInfo,
         mentionedJid: [m.sender],
+        externalAdReply: {
+          title: "𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 𝐔𝐓𝐈𝐋𝐈𝐓𝐘 ⚡",
+          body: "Toolbox Management Console",
+          mediaType: 1,
+          previewType: 0,
+          sourceUrl: 'https://github.com',
+          renderLargerThumbnail: false
+        },
         forwardedNewsletterMessageInfo: {
-          ...fake.contextInfo?.forwardedNewsletterMessageInfo,
           newsletterJid: '120363232743845068@newsletter',
-          newsletterName: "🩸 Cyber Blood - Tools ☣️"
+          newsletterName: "🦂 𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 𝐒𝐘𝐒𝐓𝐄𝐌 🦂"
         }
       }
     }, { quoted: m })
 
   } catch (e) {
     console.error(e)
-    conn.reply(m.chat, '☣️ ERRORE NEL SETTORE STRUMENTI: File immagine mancante o corrotto.', m)
+    conn.reply(m.chat, '🦂 *ERRORE:* Impossibile caricare il modulo strumenti.', m)
   }
 }
 
