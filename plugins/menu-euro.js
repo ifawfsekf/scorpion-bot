@@ -33,13 +33,10 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
       ? Object.keys(global.db.data.users).length
       : 0
 
-    let text =
-      defaultMenu.testoInizio +
-      `\n\n` +
-      defaultMenu.testoFine
-        .replace(/%name/g, name)
-        .replace(/%uptime/g, uptime)
-        .replace(/%totalreg/g, totalreg)
+let text = (defaultMenu.testoInizio + '\n' + defaultMenu.testoFine)
+  .replace(/%name%/g, name)
+  .replace(/%uptime%/g, uptime)
+  .replace(/%totalreg%/g, totalreg)
 
     const buttons = bldButtons.map(btn => ({
       buttonId: _p + btn.command,
