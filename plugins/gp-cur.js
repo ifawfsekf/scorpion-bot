@@ -14,54 +14,39 @@ if (!fs.existsSync(LIKES_FILE)) fs.writeFileSync(LIKES_FILE, '{}')
 
 const LASTFM_API_KEY = '36f859a1fc4121e7f0e931806507d5f9'
 
-// ================= FILE SYSTEM =================
-function loadUsers() { return JSON.parse(fs.readFileSync(USERS_FILE)) }
-function saveUsers(data) { fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2)) }
-function loadLikes() { return JSON.parse(fs.readFileSync(LIKES_FILE)) }
-function saveLikes(data) { fs.writeFileSync(LIKES_FILE, JSON.stringify(data, null, 2)) }
+// ================= FILE =================
+const loadUsers = () => JSON.parse(fs.readFileSync(USERS_FILE))
+const saveUsers = (d) => fs.writeFileSync(USERS_FILE, JSON.stringify(d, null, 2))
+const loadLikes = () => JSON.parse(fs.readFileSync(LIKES_FILE))
+const saveLikes = (d) => fs.writeFileSync(LIKES_FILE, JSON.stringify(d, null, 2))
 
-function getLastfmUsername(id) { return loadUsers()[id] || null }
-function setLastfmUsername(id, username) {
-  const users = loadUsers()
-  users[id] = username
-  saveUsers(users)
+const getUser = (id) => loadUsers()[id] || null
+
+const setUser = (id, username) => {
+  const u = loadUsers()
+  u[id] = username
+  saveUsers(u)
 }
 
-function generateSongId(username, artist, track) {
-  return `${username}_${artist}_${track}`
-    .replace(/[^\w\s]/gi, '')
-    .replace(/\s+/g, '_')
-    .toLowerCase()
+const songId = (u, a, t) =>
+  `${u}_${a}_${t}`.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_').toLowerCase()
+
+const addLike = (id, user) => {
+  const db = loadLikes()
+  if (!db[id]) db[id] = { likes: 0, users: [] }
+
+  if (db[id].users.includes(user))
+    return { ok: false, total: db[id].likes }
+
+  db[id].likes++
+  db[id].users.push(user)
+  saveLikes(db)
+
+  return { ok: true, total: db[id].likes }
 }
 
-function addLike(songId, userId) {
-  const likes = loadLikes()
-  if (!likes[songId]) likes[songId] = { likes: 0, users: [] }
-
-  if (likes[songId].users.includes(userId)) {
-    return { already: true, total: likes[songId].likes }
-  }
-
-  likes[songId].likes++
-  likes[songId].users.push(userId)
-  saveLikes(likes)
-
-  return { already: false, total: likes[songId].likes }
-}
-
-function getLikesReceived(username) {
-  const likes = loadLikes()
-  let total = 0
-
-  for (const id in likes) {
-    if (id.startsWith(username.toLowerCase())) total += likes[id].likes
-  }
-
-  return total
-}
-
-// ================= API =================
-async function fetchJson(url) {
+// ================= API SAFE =================
+const fetchJSON = async (url) => {
   try {
     const res = await fetch(url)
     if (!res.ok) return null
@@ -71,139 +56,131 @@ async function fetchJson(url) {
   }
 }
 
-async function getRecentTrack(username) {
-  const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${username}&api_key=${LASTFM_API_KEY}&format=json&limit=1`
-  const data = await fetchJson(url)
-  return data?.recenttracks?.track?.[0]
+const recentTrack = async (u) => {
+  const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${u}&api_key=${LASTFM_API_KEY}&format=json&limit=1`
+  const d = await fetchJSON(url)
+  return d?.recenttracks?.track?.[0]
 }
 
-async function getTrackInfo(username, artist, track) {
-  const url = `https://ws.audioscrobbler.com/2.0/?method=track.getinfo&api_key=${LASTFM_API_KEY}&artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(track)}&username=${username}&format=json`
-  const data = await fetchJson(url)
-  return data?.track
+const trackInfo = async (u, a, t) => {
+  const url = `https://ws.audioscrobbler.com/2.0/?method=track.getinfo&api_key=${LASTFM_API_KEY}&artist=${encodeURIComponent(a)}&track=${encodeURIComponent(t)}&username=${u}&format=json`
+  const d = await fetchJSON(url)
+  return d?.track
 }
 
-async function getUserInfo(username) {
-  const url = `https://ws.audioscrobbler.com/2.0/?method=user.getinfo&user=${username}&api_key=${LASTFM_API_KEY}&format=json`
-  const data = await fetchJson(url)
-  return data?.user
+const userInfo = async (u) => {
+  const url = `https://ws.audioscrobbler.com/2.0/?method=user.getinfo&user=${u}&api_key=${LASTFM_API_KEY}&format=json`
+  const d = await fetchJSON(url)
+  return d?.user
 }
 
-async function getTopArtists(username) {
-  const url = `https://ws.audioscrobbler.com/2.0/?method=user.gettopartists&user=${username}&api_key=${LASTFM_API_KEY}&format=json&period=7day&limit=10`
-  const data = await fetchJson(url)
-  return data?.topartists?.artist || []
+const topArtists = async (u) => {
+  const url = `https://ws.audioscrobbler.com/2.0/?method=user.gettopartists&user=${u}&api_key=${LASTFM_API_KEY}&format=json&period=7day&limit=10`
+  const d = await fetchJSON(url)
+  return d?.topartists?.artist || []
 }
 
 // ================= HANDLER =================
 const handler = async (m, { conn, usedPrefix, text, command }) => {
 
+  // SET USER
   if (command === 'setuser') {
-    if (!text) return m.reply(`💡 Usa: ${usedPrefix}setuser nome_utente`)
-    setLastfmUsername(m.sender, text.trim())
-    return m.reply(`✅ Profilo Last.fm collegato!`)
+    if (!text) return m.reply(`Usa: ${usedPrefix}setuser username`)
+    setUser(m.sender, text.trim())
+    return m.reply('✅ Profilo Last.fm salvato')
   }
 
-  let username = text ? text.trim() : getLastfmUsername(m.sender)
-  if (!username) return m.reply(`❌ Username non impostato.\nUsa: ${usedPrefix}setuser nome`)
+  let username = text?.trim() || getUser(m.sender)
+  if (!username) return m.reply(`❌ Imposta username: ${usedPrefix}setuser nome`)
 
-  // ===== CUR =====
+  // CUR
   if (command === 'cur') {
     await conn.sendMessage(m.chat, { react: { text: "🎧", key: m.key } })
 
-    const track = await getRecentTrack(username)
-    if (!track) return m.reply('⚠️ Nessun ascolto trovato.')
+    const t = await recentTrack(username)
+    if (!t) return m.reply('Nessun brano trovato')
 
-    const nowPlaying = track['@attr']?.nowplaying === 'true'
-    const artist = track.artist?.['#text']
-    const title = track.name
-    const album = track.album?.['#text'] || 'Singolo'
-    const image = track.image?.pop()?.['#text']
+    const artist = t.artist?.['#text'] || '-'
+    const title = t.name || '-'
+    const album = t.album?.['#text'] || 'Singolo'
+    const img = t.image?.[3]?.['#text']
 
-    const info = await getTrackInfo(username, artist, title)
-    const userInfo = await getUserInfo(username)
-    const likes = getLikesReceived(username)
+    const info = await trackInfo(username, artist, title)
+    const uinfo = await userInfo(username)
 
-    let infoMsg =
-`┏━━━━━━━━━━━━━━━━━━━━┓
-   𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴
-┗━━━━━━━━━━━━━━━━━━━━┛
+    let msg =
+`🎧 *SCORPION MUSIC*
 
-◈ 👤 Utente: ${username}
-◈ 📀 Stato: ${nowPlaying ? '🔥 In riproduzione' : '🕒 Ultimo ascolto'}
+👤 ${username}
+🎵 ${title}
+🎤 ${artist}
+💿 ${album}
 
-◈ 📌 Titolo: ${title}
-◈ 🎤 Artista: ${artist}
-◈ 💿 Album: ${album}
-
-◈ 📊 Dati:
-├ 📈 Scrobble brano: ${info?.userplaycount || 0}
-├ 🌍 Scrobble totali: ${userInfo?.playcount || 0}
-└ ❤️ Like ricevuti: ${likes}
-
-Seleziona un'opzione:`
+📊 Scrobble brano: ${info?.userplaycount || 0}
+🌍 Totale: ${uinfo?.playcount || 0}
+❤️ Like: ${getUser(m.sender) || 0}`
 
     const buttons = [
-      { buttonId: `${usedPrefix}playaud ${artist} ${title}`, buttonText: { displayText: '🎵 Scarica Audio' }, type: 1 },
       { buttonId: `${usedPrefix}like ${username}`, buttonText: { displayText: '❤️ Like' }, type: 1 },
-      { buttonId: `${usedPrefix}topartists ${username}`, buttonText: { displayText: '👑 Top Artists' }, type: 1 }
+      { buttonId: `${usedPrefix}topartists ${username}`, buttonText: { displayText: '👑 Top' }, type: 1 }
     ]
 
-    return await conn.sendMessage(m.chat, {
-      image: { url: image || 'https://cdn-icons-png.flaticon.com/512/174/174858.png' },
-      caption: infoMsg,
-      footer: 'SCORPION • 2026',
+    return conn.sendMessage(m.chat, {
+      image: { url: img || 'https://cdn-icons-png.flaticon.com/512/174/174858.png' },
+      caption: msg,
+      footer: 'SCORPION BOT',
       buttons,
       headerType: 4
     }, { quoted: m })
   }
 
-  // ===== LIKE =====
+  // LIKE
   if (command === 'like') {
-    const track = await getRecentTrack(username)
-    if (!track) return m.reply('⚠️ Nessun brano trovato.')
+    const t = await recentTrack(username)
+    if (!t) return m.reply('Nessun brano')
 
-    const songId = generateSongId(username, track.artist?.['#text'], track.name)
-    const result = addLike(songId, m.sender)
+    const id = songId(username, t.artist?.['#text'], t.name)
+    const r = addLike(id, m.sender)
 
-    if (result.already)
-      return m.reply(`💔 Hai già messo like a questo brano.`)
+    if (!r.ok) return m.reply('Hai già messo like')
 
-    return m.reply(`🔥 Like aggiunto!\n🎵 ${track.name}\n❤️ Totale: ${result.total}`)
+    return m.reply(`❤️ Like aggiunto!\nTotale: ${r.total}`)
   }
 
-  // ===== TOP ARTISTS =====
+  // TOP ARTISTS
   if (command === 'topartists') {
-    const artists = await getTopArtists(username)
-    if (!artists.length) return m.reply('❌ Nessun dato.')
+    const a = await topArtists(username)
+    if (!a.length) return m.reply('Nessun dato')
 
-    const list = artists
-      .map((a, i) => `*${i + 1}.* ${a.name} (${a.playcount})`)
-      .join('\n')
+    const list = a.map((x, i) =>
+      `${i + 1}. ${x.name} (${x.playcount})`
+    ).join('\n')
 
-    return m.reply(`👑 TOP ARTISTI (7 giorni)\n\n${list}`)
+    return m.reply(`👑 TOP ARTISTS\n\n${list}`)
   }
 
-  // ===== TESTO =====
+  // TESTO
   if (command === 'testo') {
-    const track = await getRecentTrack(username)
-    if (!track) return m.reply('⚠️ Nessun brano.')
+    const t = await recentTrack(username)
+    if (!t) return m.reply('Nessun brano')
 
     try {
-      const res = await fetch(`https://api.lyrics.ovh/v1/${encodeURIComponent(track.artist?.['#text'])}/${encodeURIComponent(track.name)}`)
-      const data = await res.json()
+      const res = await fetch(
+        `https://api.lyrics.ovh/v1/${encodeURIComponent(t.artist?.['#text'])}/${encodeURIComponent(t.name)}`
+      )
+      const d = await res.json()
 
-      if (!data.lyrics) return m.reply('❌ Testo non trovato.')
+      if (!d.lyrics) return m.reply('Testo non trovato')
 
-      return m.reply(`📝 ${track.name}\n\n${data.lyrics}`)
+      return m.reply(`📝 ${t.name}\n\n${d.lyrics}`)
     } catch {
-      return m.reply('⚠️ Errore API lyrics.')
+      return m.reply('Errore lyrics API')
     }
   }
 }
 
 handler.command = ['setuser', 'cur', 'like', 'testo', 'topartists']
-handler.group = false
 handler.tags = ['fun']
+handler.group = false
 
 export default handler
