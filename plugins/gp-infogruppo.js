@@ -1,19 +1,25 @@
 const handler = async (m, { conn, participants, groupMetadata, usedPrefix }) => {
+  // Sicurezza per il database delle chat
+  const chat = global.db.data?.chats?.[m.chat] || {};
+  
   const pp = await conn.profilePictureUrl(m.chat, 'image').catch((_) => null) || 'https://i.ibb.co/N25rgPrX/Gaara.jpg';
-  const { antiToxic, antidelete, antiver, antiLink2, welcome, detect, antiLink, reaction } = global.db.data.chats[m.chat];
+  
+  // Usiamo l'oggetto 'chat' sicuro creato sopra
+  const { antiToxic, antidelete, antiver, antiLink2, welcome, detect, antiLink, reaction } = chat;
+  
   const groupAdmins = participants.filter((p) => p.admin);
   const listAdmin = groupAdmins.map((v, i) => `│ 『 *${i + 1}* 』 @${v.id.split('@')[0]}`).join('\n');
   const owner = groupMetadata.owner || groupAdmins.find((p) => p.admin === 'superadmin')?.id || m.chat.split`-`[0] + '@s.whatsapp.net';
-  
+
   const status = (val) => {
     val = Boolean(val)
     return val ? '『 ✅ 』' : '『 ❌ 』'
   }
-  
+
   const formatRow = (nome, val) => {
     return `│ ${status(val)}- ${nome.trim()}`
   }
-  
+
   const funzioni = [
     ['Welcome', Boolean(welcome)],
     ['Rilevamento', Boolean(detect)],
@@ -23,11 +29,11 @@ const handler = async (m, { conn, participants, groupMetadata, usedPrefix }) => 
     ['Eliminazione', Boolean(antidelete)],
     ['Antitoxic', Boolean(antiToxic)]
   ]
-  
+
   const statoFunzioni = funzioni
     .map(([nome, val]) => formatRow(nome, val))
     .join('\n')
-  
+
   const text = `
     ⋆｡˚『 ╭ \`INFO ✧ GRUPPO\` ╯ 』˚｡⋆
 ╭
@@ -40,11 +46,12 @@ ${listAdmin}
 │『 ⚙️ 』  *\`Configurazione:\`*
 ${statoFunzioni}
 *╰⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─*`.trim();
-  
+
   await conn.reply(m.chat, text, m, {
     mentions: [...groupAdmins.map((v) => v.id), owner],
     contextInfo: {
-      ...global.fake.contextInfo,
+      // Se global.fake esiste prende il contextInfo, altrimenti usa un oggetto vuoto ed evita il crash
+      ...(global.fake?.contextInfo || {}), 
       externalAdReply: {
         title: `${groupMetadata.subject}`,
         body: `『 👥 』 Membri: ${participants.length}`,
@@ -61,5 +68,6 @@ handler.help = ['infogruppo'];
 handler.tags = ['gruppo'];
 handler.command = ['infogruppo', 'gp', 'infogp', 'gruppo'];
 handler.group = true;
-handler.admin = true
+handler.admin = true;
+
 export default handler;
