@@ -15,9 +15,7 @@ let tags = {
 
 const defaultMenu = {
   testoInizio: `
-🦂 *𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 ꪶ⃬🦂ꫂ* 🦂
-*ＭＡＳＴＥＲ  ＩＮＴＥＲＦＡＣＥ*
-
+ *𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 ꪶ⃬🦂ꫂ*
 ┌───────────────────
 │ 👤 *User:* %name
 │ 🕒 *Uptime:* %uptime
@@ -38,9 +36,7 @@ const localImg = './menu-principale.jpeg'
 // Rimosso Giochi ed Euro come richiesto
 const bldButtons = [
   { title: "🛡️ SICUREZZA", command: "attiva" },
-  { title: "🤖 IA", command: "menuia" },
   { title: "👥 GRUPPO", command: "menugruppo" },
-  { title: "📥 DOWNLOAD", command: "menudownload" },
   { title: "🛠️ STRUMENTI", command: "menustrumenti" },
   { title: "⭐ PREMIUM", command: "menupremium" }
 ]
