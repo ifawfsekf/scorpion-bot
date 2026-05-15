@@ -17,7 +17,7 @@ global.sam = ['447474777287'];
 global.owner = [
   ['447474777287', 'nico', true],
   ['393701330693', 'blood', true],
-  ['xxxxxxxxxxxx', 'xxxx', true],
+  ['393884508418', 'mat', true],
   ['xxxxxxxxxxxx', 'xxxx', true],
   ['xxxxxxxxxxxx', 'xxxx', true]
 ];
