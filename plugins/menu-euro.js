@@ -1,110 +1,110 @@
-import { promises } from 'fs'
+import { promises as fs } from 'fs'
 import { join } from 'path'
-import { xpRange } from '../lib/levelling.js'
-import moment from 'moment-timezone'
-import os from 'os'
-
-// --- PERCORSO IMMAGINE ---
-const localImg = join(process.cwd(), 'menu-euro.jpeg');
 
 const defaultMenu = {
-  before: `
-┎━━━━━━━━━━━━━━━━━━━┑
-┃   ✧  𝐁𝐋𝐃 - 𝐄𝐂𝐎𝐍𝐎𝐌𝐘  ✧   ┃
-┖━━━━━━━━━━━━━━━━━━━┙
-┌───────────────────┐
-  👤 𝚄𝚜𝚎𝚛: %name
-  💳 𝚂𝚊𝚕𝚍𝚘: %eris ᴇʀɪs
-  🏆 𝙻𝚟𝚕: %level
-  🛡️ 𝚁𝚊𝚗𝚔: %role
-└───────────────────┘
-
-*〘 ᴇxᴛʀᴀᴄᴛɪɴɢ ᴅᴀᴛᴀ... 〙*
-`.trimStart(),
-  header: '┍━━━〔 %category 〕━━━┑',
-  body: '┇ 🪙  *%cmd*',
-  footer: '┕━━━━━──ׄ──ׅ──ׄ──━━━━━┙\n',
-  after: `_ꜱʏꜱᴛᴇᴍ ᴏᴘᴇʀᴀᴛɪᴏɴᴀʟ ᴠ.2.0_`
+  testoInizio: `
+ *𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 ꪶ⃬🦂ꫂ*
+┌───────────────────
+│ 👤 *User:* %name
+│ 🕒 *Uptime:* %uptime
+│ 👥 *Users:* %totalreg
+└───────────────────`
+  testoFine: `_Scorpion System Terminal v3.0_`,
 }
 
-let handler = async (m, { conn, usedPrefix: _p, __dirname, args, command}) => {
-  let tags = {
-    'euro': '🗂️ ᴅᴀᴛᴀʙᴀsᴇ ᴇᴜʀᴏ'
-  }
+const localImg = './menu-principale.jpeg'
 
+// Rimosso Giochi ed Euro come richiesto
+const bldButtons = [
+  { title: "🛡️ SICUREZZA", command: "attiva" },
+  { title: "👥 GRUPPO", command: "menugruppo" },
+  { title: "🛠️ STRUMENTI", command: "menustrumenti" },
+  { title: "⭐ PREMIUM", command: "menupremium" }
+]
+
+let handler = async (m, { conn, usedPrefix: _p }) => {
   try {
     await conn.sendPresenceUpdate('composing', m.chat)
-    
-    let d = new Date(new Date().getTime() + 3600000)
-    let _uptime = process.uptime() * 1000
-    let uptime = clockString(_uptime)
 
-    let user = global.db.data.users[m.sender] || {}
-    let { level, role, eris } = user
-    let name = await conn.getName(m.sender)
+    let name = await conn.getName(m.sender) || 'User'
+    let uptime = clockString(process.uptime() * 1000)
+    let totalreg = Object.keys(global.db.data.users).length
 
-    let help = Object.values(global.plugins).filter(plugin => !plugin.disabled).map(plugin => {
-      return {
-        help: Array.isArray(plugin.help) ? plugin.help : [plugin.help],
-        tags: Array.isArray(plugin.tags) ? plugin.tags : [plugin.tags],
-        prefix: 'customPrefix' in plugin,
-      }
-    })
+    let help = Object.values(global.plugins).filter(p => !p.disabled).map(p => ({
+      help: Array.isArray(p.help) ? p.help : [p.help],
+      tags: Array.isArray(p.tags) ? p.tags : [p.tags],
+      prefix: 'customPrefix' in p
+    }))
+
+    let menuTags = Object.keys(tags)
 
     let _text = [
-      defaultMenu.before,
-      ...Object.keys(tags).map(tag => {
+      defaultMenu.testoInizio,
+      ...menuTags.map(tag => {
         return defaultMenu.header.replace(/%category/g, tags[tag]) + '\n' + [
-          ...help.filter(menu => menu.tags && menu.tags.includes(tag) && menu.help).map(menu => {
-            return menu.help.map(help => {
-              return defaultMenu.body.replace(/%cmd/g, menu.prefix ? help : _p + help)
-                .trim()
-            }).join('\n')
-          }),
+          ...help
+            .filter(menu => menu.tags.includes(tag))
+            .map(menu => menu.help.map(h => 
+              defaultMenu.body
+                .replace(/%cmd/g, menu.prefix ? h : _p + h)
+                .replace(/%emoji/g, emojicategoria[tag])
+            ).join('\n')),
           defaultMenu.footer
         ].join('\n')
       }),
-      defaultMenu.after
+      defaultMenu.testoFine
     ].join('\n')
 
-    let replace = {
-      '%': '%',
-      p: _p,
-      name, eris, level, role, uptime
+    let text = _text.replace(/%name/g, name)
+                    .replace(/%uptime/g, uptime)
+                    .replace(/%totalreg/g, totalreg)
+
+    const buttons = bldButtons.map(btn => ({
+      buttonId: _p + btn.command,
+      buttonText: { displayText: btn.title },
+      type: 1
+    }))
+
+    let imageBuffer = null
+    try {
+      imageBuffer = await fs.readFile(localImg)
+    } catch (e) {
+      // Se l'immagine non esiste, imageBuffer rimane null e non crasha
+      console.log("⚠️ Menu Image not found, sending text only.")
     }
 
-    let text = _text.replace(new RegExp(`%(${Object.keys(replace).sort((a, b) => b.length - a.length).join`|`})`, 'g'), (_, name) => '' + replace[name])
-
-    await m.react('💳')
-
-    // --- INVIO COME IMMAGINE (SOSTITUITO VIDEO) ---
-    await conn.sendMessage(m.chat, {
-      image: { url: localImg },
+    // Configurazione messaggio (con o senza immagine)
+    let messageContent = {
       caption: text.trim(),
-      contextInfo: {
-        mentionedJid: [m.sender],
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: '120363232743845068@newsletter',
-          newsletterName: "✧ 𝙱𝙻𝙳-𝙱𝙾𝚃 𝙴𝙲𝙾𝙽𝙾𝙼𝚈 ✧"
-        }
-      }
-    }, { quoted: m })
+      footer: "𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 ꪶ⃬🦂ꫂ 𝐒𝐘𝐒𝐓𝐄𝐌",
+      buttons: buttons,
+      headerType: imageBuffer ? 4 : 1,
+      viewOnce: true
+    }
+
+    if (imageBuffer) {
+      messageContent.image = imageBuffer
+    } else {
+      messageContent.text = text.trim()
+      delete messageContent.caption // Rimuovo caption se invio come testo semplice
+    }
+
+    await conn.sendMessage(m.chat, messageContent, { quoted: m })
+    await m.react('🦂')
 
   } catch (e) {
     console.error(e)
-    conn.reply(m.chat, '❌ Error in Core System: Check if menu-euro.jpeg exists.', m)
   }
 }
 
-handler.help = ['menueuro']
-handler.tags = ['menu']
-handler.command = ['menueuro']
+handler.help = ['menu']
+handler.command = ['menu', 'help']
 
 export default handler
 
 function clockString(ms) {
-  let h = isNaN(ms) ? '00' : Math.floor(ms / 3600000).toString().padStart(2, '0')
-  let m = isNaN(ms) ? '00' : (Math.floor(ms / 60000) % 60).toString().padStart(2, '0')
-  let s = isNaN(ms) ? '00' : (Math.floor(ms / 1000) % 60).toString().padStart(2, '0')
-  return `${h}:${m}:${s}`
+  let h = Math.floor(ms / 3600000)
+  let m = Math.floor(ms / 60000) % 60
+  let s = Math.floor(ms / 1000) % 60
+  return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':')
 }
