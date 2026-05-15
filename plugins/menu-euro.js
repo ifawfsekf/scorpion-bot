@@ -4,9 +4,9 @@ const defaultMenu = {
   testoInizio: `
 *𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 ꪶ⃬🦂ꫂ*
 ┌───────────────────
-│ 👤 *User:* %name
-│ 🕒 *Uptime:* %uptime
-│ 👥 *Users:* %totalreg
+│ 👤 *User:* %name%
+│ 🕒 *Uptime:* %uptime%
+│ 👥 *Users:* %totalreg%
 └───────────────────
 `,
 
