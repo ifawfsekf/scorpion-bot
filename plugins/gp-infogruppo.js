@@ -2,63 +2,66 @@ const handler = async (m, { conn, participants, groupMetadata, usedPrefix }) => 
   // Sicurezza per il database delle chat
   const chat = global.db.data?.chats?.[m.chat] || {};
   
-  const pp = await conn.profilePictureUrl(m.chat, 'image').catch((_) => null) || 'https://i.ibb.co/N25rgPrX/Gaara.jpg';
+  const pp = await conn.profilePictureUrl(m.chat, 'image').catch((_) => null) || 'https://qu.ax/STfV.jpg';
   
-  // Usiamo l'oggetto 'chat' sicuro creato sopra
+  // Estrazione configurazioni
   const { antiToxic, antidelete, antiver, antiLink2, welcome, detect, antiLink, reaction } = chat;
   
   const groupAdmins = participants.filter((p) => p.admin);
-  const listAdmin = groupAdmins.map((v, i) => `│ 『 *${i + 1}* 』 @${v.id.split('@')[0]}`).join('\n');
+  const listAdmin = groupAdmins.map((v, i) => `   ┇ ⌬ Admin » @${v.id.split('@')[0]}`).join('\n');
   const owner = groupMetadata.owner || groupAdmins.find((p) => p.admin === 'superadmin')?.id || m.chat.split('-')[0] + '@s.whatsapp.net';
 
   const status = (val) => {
-    val = Boolean(val)
-    return val ? '『 ✅ 』' : '『 ❌ 』'
-  }
-
-  const formatRow = (nome, val) => {
-    return `│ ${status(val)}- ${nome.trim()}`
+    return val ? '✅' : '❌'
   }
 
   const funzioni = [
-    ['Welcome', Boolean(welcome)],
-    ['Rilevamento', Boolean(detect)],
-    ['Antilink', Boolean(antiLink)],
-    ['Antilink 2', Boolean(antiLink2)],
-    ['Reazioni', Boolean(reaction)],
-    ['Eliminazione', Boolean(antidelete)],
-    ['Antitoxic', Boolean(antiToxic)]
+    ['WELCOME', welcome],
+    ['DETECT', detect],
+    ['ANTILINK', antiLink],
+    ['ANTILINK 2', antiLink2],
+    ['REACTIONS', reaction],
+    ['ANTIDELETE', antidelete],
+    ['ANTITOXIC', antiToxic]
   ]
 
   const statoFunzioni = funzioni
-    .map(([nome, val]) => formatRow(nome, val))
+    .map(([nome, val]) => `   ┇ ⌬ ${nome.padEnd(12)} » ${status(val)}`)
     .join('\n')
 
   const text = `
-    ⋆｡˚『 ╭ \`INFO ✧ GRUPPO\` ╯ 』˚｡⋆
-╭
-│ 『 📛 』 \`Nome:\` *${groupMetadata.subject}*
-│ 『 👑 』 \`Creatore:\` *@${owner.split('@')[0]}*
-│ 『 ✨ 』 \`Amministratori:\`
+   *𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 ꪶ⃬🦂ꫂ*
+   ──────────────
+   *GROUP:* _${groupMetadata.subject}_
+   *MEMBERS:* _${participants.length}_
+   *OWNER:* _@${owner.split('@')[0]}_
+   ──────────────
+
+   *╒══  👥 𝐀𝐃𝐌𝐈𝐍 𝐋𝐈𝐒𝐓  ══╕*
 ${listAdmin}
-│ 『 📢 』 \`Descrizione:\` ${groupMetadata.desc?.toString() || 'Nessuna descrizione'}
-│
-│『 ⚙️ 』  *\`Configurazione:\`*
+   *╘══════════════╛*
+
+   *╒══  ⚙️ 𝐒𝐄𝐓𝐓𝐈𝐍𝐆𝐒  ══╕*
 ${statoFunzioni}
-*╰⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─*`.trim();
+   *╘══════════════╛*
+
+   _Scorpion Group Monitor v3.0_`.trim();
 
   await conn.sendMessage(m.chat, {
     text: text,
     contextInfo: {
-      ...(global.fake?.contextInfo || {}),
       mentionedJid: [...groupAdmins.map((v) => v.id), owner],
       externalAdReply: {
-        title: `${groupMetadata.subject}`,
-        body: `『 👥 』 Membri: ${participants.length}`,
+        title: "𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 𝐆𝐑𝐎𝐔𝐏 𝐈𝐍𝐅𝐎 ⚡",
+        body: `Soggetto: ${groupMetadata.subject}`,
         thumbnailUrl: pp,
-        sourceUrl: null,
         mediaType: 1,
-        renderLargerThumbnail: false
+        renderLargerThumbnail: false,
+        sourceUrl: 'https://github.com'
+      },
+      forwardedNewsletterMessageInfo: {
+        newsletterJid: '120363232743845068@newsletter',
+        newsletterName: "🦂 𝐒𝐂𝚯𝐑𝐏𝐈𝚯𝚴 𝐒𝐘𝐒𝐓𝐄𝐌 🦂"
       }
     }
   }, { quoted: m });
