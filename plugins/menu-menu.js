@@ -8,7 +8,7 @@ const defaultMenu = {
 │ 👤 *User:* %name
 │ 🕒 *Uptime:* %uptime
 │ 👥 *Users:* %totalreg
-└───────────────────
+└───────────────────`
   testoFine: `_Scorpion System Terminal v3.0_`,
 }
 
