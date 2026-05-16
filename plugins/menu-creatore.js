@@ -7,7 +7,7 @@ import { join } from 'path'
 const defaultMenu = {
   before: `
 ┎━━━━━━━━━━━━━━━━━━━┑
-┃   ✧  𝐁𝐋𝐃 - 𝐂𝐑𝐄𝐀𝐓𝐎𝐑  ✧   ┃
+┃   ✧ 𝐂𝐑𝐄𝐀𝐓𝐎𝐑  ✧   ┃
 ┖━━━━━━━━━━━━━━━━━━━┙
 ┌───────────────────┐
   👤 𝙾𝚠𝚗𝚎𝚛: %name
@@ -77,7 +77,7 @@ let handler = async (m, { conn, usedPrefix: _p, __dirname }) => {
         mentionedJid: [m.sender],
         forwardedNewsletterMessageInfo: {
           newsletterJid: '120363232743845068@newsletter',
-          newsletterName: "✧ 𝙱𝙻𝙳-𝙱𝙾𝚃 𝙲𝚁𝙴𝙰𝚃𝙾𝚁 ✧"
+          newsletterName: "✧  𝙲𝚁𝙴𝙰𝚃𝙾𝚁 ✧"
         }
       }
     }, { quoted: m })
