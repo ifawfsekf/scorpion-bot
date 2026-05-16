@@ -19,8 +19,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 
     const message = `
 ╭━━━━━━•✦•━━━━━━╮
-              ✨ ᴘɪɴɢ ✨
-            ʙʟᴏᴏᴅ-ʙᴏᴛ
+    ✨ ᴘɪɴɢ ✨
 ╰━━━━━━•✦•━━━━━━╯
 
 ◈ 𝖴ptim𝖾: \`${uptimeStr}\`
@@ -28,7 +27,6 @@ let handler = async (m, { conn, usedPrefix }) => {
 ◈ 𝖠𝗏𝗏𝗂𝗈: \`${activationTime}\`
 
 ╭━━━━━━•✦•━━━━━━╮
-   𝖮𝗐𝗇𝖾𝗋: *BLOOD*
    𝖲𝗍𝖺𝗍𝗈: _Online_
 ╰━━━━━━•✦•━━━━━━╯`.trim()
 
